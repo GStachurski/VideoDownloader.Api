@@ -20,11 +20,11 @@ namespace VideoDownloader.Api.Controllers
         }
 
         /// <summary>
-        /// Takes a recommendation search request and indexes it's elastic search query document output to the percolator index.
+        /// Takes a list of videos and converts them to downloads
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [SwaggerResponse((int)HttpStatusCode.OK, "Successful percolate query index.")]
+        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads)
