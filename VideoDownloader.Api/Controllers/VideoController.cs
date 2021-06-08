@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using VideoDownloader.Api.Interfaces;
@@ -29,6 +31,23 @@ namespace VideoDownloader.Api.Controllers
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads)
         {
+            try
+            {
+                if (downloads.Any())
+                {
+                    var videos = await _videoService.GetVideosFromDownloads(downloads);
+                    var results = await _videoService.GetDownloadResults(videos);
+                }
+                else
+                {
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+
             return Ok();
         }
     }

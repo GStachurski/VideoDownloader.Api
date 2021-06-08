@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using VideoDownloader.Api.Interfaces;
 using VideoDownloader.Api.Models;
 using VideoDownloader.Api.Options;
 
 namespace VideoDownloader.Api.Services
 {
-    public class DataParsingService
+    public class DataParsingService : IDataParsingService
     {
         private readonly ApiOptions _apiOptions;
 
@@ -36,6 +37,14 @@ namespace VideoDownloader.Api.Services
             }
 
             return editWindows;
+        }
+
+        public bool IsValidDownloadUrl(string downloadUrl)
+        {
+            Uri uriResult;
+            bool result = Uri.TryCreate(downloadUrl, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            return result;
         }
 
         private EditWindow GetEditWindow(string editWindowStr)
