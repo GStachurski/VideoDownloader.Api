@@ -8,9 +8,9 @@ namespace VideoDownloader.Api.Interfaces
 {
     public interface IVideoDownloadService
     {
-        Task<IEnumerable<Video>> GetVideosFromDownloads(List<Download> downloads);
+        Task<IEnumerable<Video>> GetVideos(List<Download> downloads);
 
-        Task<IEnumerable<VideoDownloadResult>> GetDownloadResults(IEnumerable<Video> videos);
+        Task<IEnumerable<VideoDownloadResult>> GetDownloads(IEnumerable<Video> videos);
 
         Task<HttpStatusCode> Status();
     }

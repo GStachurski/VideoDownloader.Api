@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VideoDownloader.Api.Interfaces;
@@ -11,9 +12,9 @@ namespace VideoDownloader.Api.Services
     {
         private readonly ApiOptions _apiOptions;
 
-        public DataParsingService(ApiOptions apiOptions)
+        public DataParsingService(IOptions<ApiOptions> apiOptions)
         {
-            _apiOptions = apiOptions;
+            _apiOptions = apiOptions.Value;
         }
 
         public List<EditWindow> GetVideoEditWindows(Download download)

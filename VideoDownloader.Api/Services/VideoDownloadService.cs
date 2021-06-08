@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -17,21 +16,21 @@ namespace VideoDownloader.Api.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ApiOptions _apiOptions;
-        private DataParsingService _parsingService;
+        private IDataParsingService _parsingService;
 
-        public VideoDownloadService(HttpClient httpClient, ApiOptions options, DataParsingService parsingService)
+        public VideoDownloadService(HttpClient httpClient, IOptions<ApiOptions> options, IDataParsingService parsingService)
         {
             _httpClient = httpClient;
-            _apiOptions = options;
+            _apiOptions = options.Value;
             _parsingService = parsingService;
         }
 
-        public async Task<IEnumerable<VideoDownloadResult>> GetDownloadResults(IEnumerable<Video> videos)
+        public async Task<IEnumerable<VideoDownloadResult>> GetDownloads(IEnumerable<Video> videos)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Video>> GetVideoManifests(List<Download> downloads)
+        public async Task<IEnumerable<Video>> GetVideos(List<Download> downloads)
         {
             var youtubeClient = new YoutubeClient();
             var videoDownloadList = new List<Video>();

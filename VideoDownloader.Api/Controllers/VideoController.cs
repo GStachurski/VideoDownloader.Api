@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +26,23 @@ namespace VideoDownloader.Api.Controllers
         /// <summary>
         /// Takes a list of videos and converts them to downloads
         /// </summary>
-        /// <param name="request"></param>
+        /// <remarks>
+        /// Sample request:
+        /// {
+        ///   "downloads": [
+        ///     {
+        ///       "Name": "Wilderness Cabin",
+        ///       "Url": "https://www.youtube.com/watch?v=GWehiacnd1E",
+        ///       "EditTimes": "15:41-20:11"
+        ///     },
+        ///     {
+        ///       "Name": "Roadside Barn",
+        ///       "Url": "https://www.youtube.com/watch?v=vJpKhiXvXdA",
+        ///       "EditTimes": "16:24-22:00"
+        ///     }]
+        /// }
+        /// </remarks>
+        /// <param name="downloads">A JSON array of downloads</param>
         /// <returns></returns>
         [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
@@ -35,8 +53,8 @@ namespace VideoDownloader.Api.Controllers
             {
                 if (downloads.Any())
                 {
-                    var videos = await _videoService.GetVideosFromDownloads(downloads);
-                    var results = await _videoService.GetDownloadResults(videos);
+                    var videos = await _videoService.GetVideos(downloads);
+                    //var results = await _videoService.GetDownloads(videos);
                 }
                 else
                 {
@@ -45,6 +63,7 @@ namespace VideoDownloader.Api.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "error occured while geting video manifests");
                 return BadRequest();
             }
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
 using System.IO;
 using System.Linq;
@@ -42,14 +43,15 @@ namespace VideoDownloader.Api
             var container = new ServiceContainer(containerOptions);
             services.AddControllersWithViews();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.Configure<ApiOptions>(Configuration.GetSection(nameof(ApiOptions)));            
+            services.Configure<ApiOptions>(Configuration.GetSection(nameof(ApiOptions)));
             services.AddSingleton<IDataParsingService, DataParsingService>();
+            services.AddHttpClient<IVideoDownloadService, VideoDownloadService>();
 
             // ffmpeg
             ConfigureFFmpeg();
 
             // video download service
-            services.AddHttpClient<IVideoDownloadService, VideoDownloadService>();
+
             services.AddMvc()
                 .AddControllersAsServices()
                 .AddNewtonsoftJson();
@@ -69,6 +71,7 @@ namespace VideoDownloader.Api
         public void ConfigureFFmpeg()
         {
             var ffmpegPath = Configuration.GetValue<string>("ApiOptions:VideoFFmpegPath");
+            Log.Information($"loading ffmpegPath from {ffmpegPath}");
             FFmpeg.SetExecutablesPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FFmpeg"));
         }
 

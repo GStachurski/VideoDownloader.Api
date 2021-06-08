@@ -1,8 +1,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using VideoDownloader.Api.Models;
 using VideoDownloader.Api.Options;
 using VideoDownloader.Api.Services;
+using Moq;
 
 namespace VideoDownloader.Api.Tests
 {
@@ -13,8 +15,8 @@ namespace VideoDownloader.Api.Tests
         public void VideoListsAreParseableByTheDataParsingService()
         {
             // arrange
-            var mockOptions = new ApiOptions();
-            var dataParser = new DataParsingService(mockOptions);
+            var mockOptions = new Mock<IOptions<ApiOptions>>();
+            var dataParser = new DataParsingService(mockOptions.Object);
 
             var downloadList_singleItem = new Download 
             { 
