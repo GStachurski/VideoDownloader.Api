@@ -42,9 +42,12 @@ namespace VideoDownloader.Api.Services
 
         public bool IsValidDownloadUrl(string downloadUrl)
         {
-            Uri uriResult;
-            bool result = Uri.TryCreate(downloadUrl, UriKind.Absolute, out uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            bool result = _apiOptions.CheckForHttps
+                ? Uri.TryCreate(downloadUrl, UriKind.Absolute, out Uri uriResult) 
+                    && uriResult.Scheme == Uri.UriSchemeHttps
+                : Uri.TryCreate(downloadUrl, UriKind.Absolute, out uriResult) 
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
             return result;
         }
 

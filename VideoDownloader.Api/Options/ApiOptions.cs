@@ -1,10 +1,18 @@
 ﻿namespace VideoDownloader.Api.Options
 {
-    public class ApiOptions
+    public class ApiOptions 
     {
-        public string VideoDownloadUrl { get; }
-        public string VideoEditingUrl { get; }
-        public string VideoFFmpegPath { get; }
-        public bool CheckForHttps { get; }
+        public VideoSettings VideoSettings { get; set; }
+        public bool CheckForHttps { get; set; }
+        public bool SeperateAudioAndVideoStreams { get; set; }
+    }
+
+    public class VideoSettings
+    {
+        public string DownloadUrl { get; set; }
+        public string EditingUrl { get; set; }
+        public string FFmpegPath { get; set; }
+
+        public string DownloadPath { get; set; }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +53,7 @@ namespace VideoDownloader.Api.Controllers
                 if (downloads.Any())
                 {
                     var videos = await _videoService.GetVideos(downloads);
-                    //var results = await _videoService.GetDownloads(videos);
+                    var results = await _videoService.DownloadVideos(videos);
                 }
                 else
                 {

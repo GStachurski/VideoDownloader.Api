@@ -43,14 +43,17 @@ namespace VideoDownloader.Api
             var container = new ServiceContainer(containerOptions);
             services.AddControllersWithViews();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            // add the api options
+            services.AddOptions();
             services.Configure<ApiOptions>(Configuration.GetSection(nameof(ApiOptions)));
+
+            // data and video downloader services
             services.AddSingleton<IDataParsingService, DataParsingService>();
-            services.AddHttpClient<IVideoDownloadService, VideoDownloadService>();
+            services.AddSingleton<IVideoDownloadService, VideoDownloadService>();
 
             // ffmpeg
             ConfigureFFmpeg();
-
-            // video download service
 
             services.AddMvc()
                 .AddControllersAsServices()
@@ -70,9 +73,9 @@ namespace VideoDownloader.Api
 
         public void ConfigureFFmpeg()
         {
-            var ffmpegPath = Configuration.GetValue<string>("ApiOptions:VideoFFmpegPath");
+            var ffmpegPath = Configuration.GetValue<string>("ApiOptions:VideoSettings:FFmpegPath");
             Log.Information($"loading ffmpegPath from {ffmpegPath}");
-            FFmpeg.SetExecutablesPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FFmpeg"));
+            FFmpeg.SetExecutablesPath(ffmpegPath);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
