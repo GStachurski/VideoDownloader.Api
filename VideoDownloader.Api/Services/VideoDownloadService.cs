@@ -10,6 +10,7 @@ using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
 using YoutubeExplode.Converter;
 using YoutubeExplode.Videos;
+using ByteSizeLib;
 
 namespace VideoDownloader.Api.Services
 {
@@ -39,28 +40,35 @@ namespace VideoDownloader.Api.Services
                     if (_apiOptions.SeperateAudioAndVideoStreams)
                     {
                         // get best audio and video streams if we're downloading them seperately
-                        var hqAudio = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
-                        var hqVideo = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
-                        Log.Information($"getting stream for audio bitrate '{hqAudio.Bitrate}' and video quality '{hqVideo.VideoQuality}' and resolution '{hqVideo.VideoResolution}')");
+                        var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
+                        var hqVid = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
+                        var fullVideoTitle = $"{video.Title}.{hqVid.Container.Name}";
+                        Log.Information(@$"downloading {fullVideoTitle} at bitrate '{hqAud.Bitrate}' video quality '{hqVid.VideoQuality}' and res '{hqVid.VideoResolution}'");
 
                         try
                         {
                             // path contains ending slash
-                            var fullPath = $"{_downloadPath}{video.Title}.{hqVideo.Container.Name}";
+                            var fullPath = $"{_downloadPath}{fullVideoTitle}";
                             await _youtubeClient.Videos.DownloadAsync(
-                                new IStreamInfo[] { hqAudio, hqVideo },
+                                new IStreamInfo[] { hqAud, hqVid },
                                     new ConversionRequestBuilder(fullPath)
-                                        .SetPreset(ConversionPreset.Fast)
+                                        .SetPreset(ConversionPreset.UltraFast)
                                         .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
                                         .Build());
                         }
                         catch (Exception ex)
                         {
-                            Log.Error(ex, $"error while attempting to download video {hqVideo.Url}");
+                            Log.Error(ex, $"error while attempting to download video {hqVid.Url}");
                             throw ex;
                         }
 
-                        videoDownloadResults.Add(new VideoDownloadResult { IsSuccessful = true, Location = _apiOptions.VideoSettings.DownloadPath, Size = hqVideo.Size.MegaBytes });
+                        videoDownloadResults.Add(new VideoDownloadResult
+                        {
+                            Title = fullVideoTitle,
+                            IsSuccessful = true,
+                            Location = _apiOptions.VideoSettings.DownloadPath,
+                            Size = ByteSize.FromMegaBytes(hqVid.Size.MegaBytes).ToString()
+                        });
                     }
                     else
                     {
@@ -68,10 +76,11 @@ namespace VideoDownloader.Api.Services
                         var hqVid = manifests.GetMuxedStreams().TryGetWithHighestVideoQuality();
                         if (hqVid != null)
                         {
+                            var fullVideoTitle = $"{video.Title}.{hqVid.Container}";
                             Log.Information($"getting stream for bitrate '{hqVid.Bitrate}' and quality '{hqVid.VideoQuality}' and resolution '{hqVid.VideoResolution}')");
                             try
                             {
-                                await _youtubeClient.Videos.Streams.DownloadAsync(hqVid, $"{_downloadPath}\\{video.Title}.{hqVid.Container}");
+                                await _youtubeClient.Videos.Streams.DownloadAsync(hqVid, $"{_downloadPath}\\{fullVideoTitle}");
                             }
                             catch (Exception ex)
                             {
@@ -79,7 +88,13 @@ namespace VideoDownloader.Api.Services
                                 throw ex;
                             }
 
-                            videoDownloadResults.Add(new VideoDownloadResult { IsSuccessful = true, Location = _apiOptions.VideoSettings.DownloadPath, Size = hqVid.Size.MegaBytes });
+                            videoDownloadResults.Add(new VideoDownloadResult
+                            {
+                                Title = fullVideoTitle,
+                                IsSuccessful = true,
+                                Location = _apiOptions.VideoSettings.DownloadPath,
+                                Size = ByteSize.FromMegaBytes(hqVid.Size.MegaBytes).ToString()
+                            });
                         }
                     }
                 }

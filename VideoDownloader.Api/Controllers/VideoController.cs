@@ -48,12 +48,14 @@ namespace VideoDownloader.Api.Controllers
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads)
         {
+            var results = new List<VideoDownloadResult>();
+
             try
             {
                 if (downloads.Any())
                 {
                     var videos = await _videoService.GetVideos(downloads);
-                    var results = await _videoService.DownloadVideos(videos);
+                    results = (await _videoService.DownloadVideos(videos)).ToList();
                 }
                 else
                 {
@@ -66,7 +68,7 @@ namespace VideoDownloader.Api.Controllers
                 return BadRequest();
             }
 
-            return Ok();
+            return Ok(results);
         }
     }
 }
