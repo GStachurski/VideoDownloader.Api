@@ -5,6 +5,8 @@ using YoutubeExplode;
 using VideoDownloader.Api.Models;
 using System.IO;
 using System.Threading.Tasks;
+using Xabe.FFmpeg;
+using System;
 
 namespace VideoDownloader.Api.Tests
 {
@@ -36,13 +38,41 @@ namespace VideoDownloader.Api.Tests
                 await youtubeClient.Videos.DownloadAsync(
                     new IStreamInfo[] { hqAudio, hqVideo },
                         new ConversionRequestBuilder(fullPath)
-                            .SetPreset(ConversionPreset.Fast)
+                            .SetPreset(YoutubeExplode.Converter.ConversionPreset.Fast)
                             .SetFFmpegPath(ffMpegPath)
                             .Build());
             }).GetAwaiter().GetResult();
 
             // assert
             Assert.IsTrue(File.Exists(fullPath));
+        }
+    
+
+        [TestMethod]
+        public void FFmpegCanChopUpVideos()
+        {
+            // arrange
+            var finalDuration = new TimeSpan();
+            FFmpeg.SetExecutablesPath(@"C:\FFMPEG\");
+            var videoPath = @"C:\Videos\bobross_video_sample.mp4";
+            var videoOutputPath = @"C:\Videos\bobross_video_sample_chopped.mp4";            
+            var editWindow = new EditWindow {
+                StartTime = new TimeSpan(0, 11, 35),
+                EndTime = new TimeSpan(0, 17, 40)
+            };
+            var timeSpanDiff = editWindow.EndTime - editWindow.StartTime;
+
+            // act
+            Task.Run(async () =>
+            {
+                IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(videoPath);
+                IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoPath, videoOutputPath, editWindow.StartTime, timeSpanDiff);
+                IConversionResult result = await conversion.Start();
+                finalDuration = result.Duration;
+            }).GetAwaiter().GetResult();
+
+            // assert
+            Assert.IsTrue(File.Exists(videoOutputPath));
         }
     }
 }
