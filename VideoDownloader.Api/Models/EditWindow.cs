@@ -1,8 +1,11 @@
-﻿namespace VideoDownloader.Api.Models
+﻿using System;
+
+namespace VideoDownloader.Api.Models
 {
     public class EditWindow
     {
-        public string StartTime { get; set; }
-        public string EndTime { get; set; }
+        // MM:ss
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
     }
 }

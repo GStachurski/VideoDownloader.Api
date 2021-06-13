@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using VideoDownloader.Api.Interfaces;
@@ -20,16 +23,52 @@ namespace VideoDownloader.Api.Controllers
         }
 
         /// <summary>
-        /// Takes a recommendation search request and indexes it's elastic search query document output to the percolator index.
+        /// Takes a list of videos and converts them to downloads
         /// </summary>
-        /// <param name="request"></param>
+        /// <remarks>
+        /// Sample request:
+        /// {
+        ///   "downloads": [
+        ///     {
+        ///       "Name": "Wilderness Cabin",
+        ///       "Url": "https://www.youtube.com/watch?v=GWehiacnd1E",
+        ///       "EditTimes": "15:41-20:11"
+        ///     },
+        ///     {
+        ///       "Name": "Roadside Barn",
+        ///       "Url": "https://www.youtube.com/watch?v=vJpKhiXvXdA",
+        ///       "EditTimes": "16:24-22:00"
+        ///     }]
+        /// }
+        /// </remarks>
+        /// <param name="downloads">A JSON array of downloads</param>
         /// <returns></returns>
-        [SwaggerResponse((int)HttpStatusCode.OK, "Successful percolate query index.")]
+        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads)
         {
-            return Ok();
+            var results = new List<VideoDownloadResult>();
+
+            try
+            {
+                if (downloads.Any())
+                {
+                    var videos = await _videoService.GetVideos(downloads);
+                    results = (await _videoService.DownloadVideos(videos)).ToList();
+                }
+                else
+                {
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "error occured while geting video manifests");
+                return BadRequest();
+            }
+
+            return Ok(results);
         }
     }
 }

@@ -2,21 +2,20 @@ using LightInject;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using VideoDownloader.Api.Interfaces;
 using VideoDownloader.Api.Options;
 using VideoDownloader.Api.Services;
+using Xabe.FFmpeg;
 
 namespace VideoDownloader.Api
 {
@@ -40,15 +39,21 @@ namespace VideoDownloader.Api
                     => serviceNames.SingleOrDefault(string.IsNullOrWhiteSpace) ?? serviceNames.Last(),
                 EnableVariance = false
             };
-            var container = new ServiceContainer(containerOptions);
 
+            var container = new ServiceContainer(containerOptions);
             services.AddControllersWithViews();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
+            // add the api options
+            services.AddOptions();
             services.Configure<ApiOptions>(Configuration.GetSection(nameof(ApiOptions)));
 
-            // Search
-            services.AddHttpClient<IVideoDownloadService, VideoDownloadService>();
+            // data and video downloader services
+            services.AddSingleton<IDataParsingService, DataParsingService>();
+            services.AddSingleton<IVideoDownloadService, VideoDownloadService>();
+
+            // ffmpeg
+            ConfigureFFmpeg();
 
             services.AddMvc()
                 .AddControllersAsServices()
@@ -61,8 +66,16 @@ namespace VideoDownloader.Api
                     Version = "v1",
                     Description = "This API provides an interface for downloading videos, editing them, and outputting them as one file."
                 });
+
             });
             services.AddControllers();
+        }
+
+        public void ConfigureFFmpeg()
+        {
+            var ffmpegPath = Configuration.GetValue<string>("ApiOptions:VideoSettings:FFmpegPath");
+            Log.Information($"loading ffmpegPath from {ffmpegPath}");
+            FFmpeg.SetExecutablesPath(ffmpegPath);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
