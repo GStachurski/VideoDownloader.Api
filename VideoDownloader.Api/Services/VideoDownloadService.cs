@@ -42,19 +42,28 @@ namespace VideoDownloader.Api.Services
                         // get best audio and video streams if we're downloading them seperately
                         var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
                         var hqVid = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
+
                         var fullVideoTitle = $"{video.Title}.{hqVid.Container.Name}";
-                        Log.Information(@$"downloading {fullVideoTitle} at bitrate '{hqAud.Bitrate}' video quality '{hqVid.VideoQuality}' and res '{hqVid.VideoResolution}'");
+                        var fullPath = $"{_downloadPath}{fullVideoTitle}";
 
                         try
                         {
                             // path contains ending slash
-                            var fullPath = $"{_downloadPath}{fullVideoTitle}";
-                            await _youtubeClient.Videos.DownloadAsync(
-                                new IStreamInfo[] { hqAud, hqVid },
-                                    new ConversionRequestBuilder(fullPath)
-                                        .SetPreset(ConversionPreset.UltraFast)
-                                        .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
-                                        .Build());
+                            Log.Information(@$"downloading {fullVideoTitle} 
+                                            at bitrate '{hqAud.Bitrate}' 
+                                            video quality '{hqVid.VideoQuality}' 
+                                            and resolution '{hqVid.VideoResolution}'");
+
+                            await RetryPolicyHandler.DownloadRetryPolicy().ExecuteAsync(async () =>
+                            {
+                                await _youtubeClient.Videos.DownloadAsync(
+                                     new IStreamInfo[] { hqAud, hqVid },
+                                         new ConversionRequestBuilder(fullPath)
+                                             .SetPreset(ConversionPreset.UltraFast)
+                                             .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
+                                             .Build()
+                                             );                                
+                            });
                         }
                         catch (Exception ex)
                         {

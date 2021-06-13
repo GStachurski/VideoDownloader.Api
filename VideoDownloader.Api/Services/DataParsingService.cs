@@ -28,7 +28,7 @@ namespace VideoDownloader.Api.Services
 
             if (download.EditTimes.Contains(',', StringComparison.InvariantCultureIgnoreCase))
             {
-                // TODO: check for a split limit here eventually (maybe 10 o 20?)
+                // TODO: check for a split limit here eventually (10 or 25?)
                 var editTimeList = download.EditTimes.Split(',').ToList();
                 editWindows.AddRange(from editTime in editTimeList select GetEditWindow(editTime));
             }
