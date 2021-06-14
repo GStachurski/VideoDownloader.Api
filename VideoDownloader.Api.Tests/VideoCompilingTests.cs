@@ -94,7 +94,7 @@ namespace VideoDownloader.Api.Tests
             };
 
             // act
-            int fileCount = 1;
+            int fileCount = 0;
             foreach (var edit in editList)
             {
                 // pad the end by a second just to make sure we get full clip
@@ -112,7 +112,7 @@ namespace VideoDownloader.Api.Tests
             }
 
             // assert
-            Assert.AreEqual(fileCount, editList);
+            Assert.AreEqual(fileCount, editList.Count);
         }
     }
 }
