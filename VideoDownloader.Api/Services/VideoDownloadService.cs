@@ -37,8 +37,6 @@ namespace VideoDownloader.Api.Services
                 var manifests = await _youtubeClient.Videos.Streams.GetManifestAsync(video.Id);                
                 if (manifests != null)
                 {
-                    if (_apiOptions.SeperateAudioAndVideoStreams)
-                    {
                         // get best audio and video streams if we're downloading them seperately
                         var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
                         var hqVid = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
@@ -77,35 +75,7 @@ namespace VideoDownloader.Api.Services
                             IsSuccessful = true,
                             Location = _apiOptions.VideoSettings.DownloadPath,
                             Size = ByteSize.FromMegaBytes(hqVid.Size.MegaBytes).ToString()
-                        });
-                    }
-                    else
-                    {
-                        // get best audio and video streams already muxed together
-                        var hqVid = manifests.GetMuxedStreams().TryGetWithHighestVideoQuality();
-                        if (hqVid != null)
-                        {
-                            var fullVideoTitle = $"{video.Title}.{hqVid.Container}";
-                            Log.Information($"getting stream for bitrate '{hqVid.Bitrate}' and quality '{hqVid.VideoQuality}' and resolution '{hqVid.VideoResolution}')");
-                            try
-                            {
-                                await _youtubeClient.Videos.Streams.DownloadAsync(hqVid, $"{_downloadPath}\\{fullVideoTitle}");
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Error(ex, $"error while attempting to download video {hqVid.Url}");
-                                throw ex;
-                            }
-
-                            videoDownloadResults.Add(new VideoDownloadResult
-                            {
-                                Title = fullVideoTitle,
-                                IsSuccessful = true,
-                                Location = _apiOptions.VideoSettings.DownloadPath,
-                                Size = ByteSize.FromMegaBytes(hqVid.Size.MegaBytes).ToString()
-                            });
-                        }
-                    }
+                        });                    
                 }
             }
 

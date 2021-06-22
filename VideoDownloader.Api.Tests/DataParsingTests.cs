@@ -12,7 +12,7 @@ namespace VideoDownloader.Api.Tests
     public class DataParsingTests
     {
         [TestMethod]
-        public void VideoListsAreParseableByTheDataParsingService()
+        public void VideoEditWindowsAreParseable()
         {
             // arrange
             var mockOptions = new Mock<IOptions<ApiOptions>>();
@@ -22,19 +22,23 @@ namespace VideoDownloader.Api.Tests
             { 
                 Name = "Wilderness Cabin", 
                 Url = "https://www.youtube.com/watch?v=GWehiacnd1E", 
-                EditTimes = "15:41-20:11"
+                EditTimes = "15:41-20:11",
+                EditOrder = 1,
+                Source = DownloadSource.YouTube
             };
 
             var downloadList_DoubleItem = new Download 
             { 
                 Name = "Winter Night", 
                 Url = "https://www.youtube.com/watch?v=8ysFkNYwhAE", 
-                EditTimes = "9:53-16:02,17:41-18:20" 
+                EditTimes = "9:53-16:02,17:41-18:20",
+                EditOrder = 2,
+                Source = DownloadSource.YouTube
             };            
 
             // act
             var listOneResult = dataParser.GetVideoEditWindows(downloadList_singleItem);
-            var listTwoResult = dataParser.GetVideoEditWindows(downloadList_DoubleItem);
+            var listTwoResult = dataParser.GetVideoEditWindows(downloadList_DoubleItem);            
 
             // assert
             Assert.AreEqual(listOneResult.Count, 1);

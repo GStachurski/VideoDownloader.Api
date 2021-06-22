@@ -8,6 +8,7 @@ namespace VideoDownloader.Api.Services
     {
         public static AsyncPolicy DownloadRetryPolicy()
         {
+            // TODO figure out a better way to handle retries, add logging around retry error
             return Policy
                 .Handle<HttpRequestException>()
                 .WaitAndRetryAsync(new[] { 
