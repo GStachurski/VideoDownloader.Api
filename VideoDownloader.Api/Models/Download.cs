@@ -6,6 +6,7 @@
         public string Name { get; set; }
         public string Url { get; set; }
         public string EditTimes { get; set; }
+        public int? EditOrder { get; set; }
         public DownloadSource Source { get; set; }
     }
 }
