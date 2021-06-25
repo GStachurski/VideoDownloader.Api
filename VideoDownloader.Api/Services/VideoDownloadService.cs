@@ -11,6 +11,8 @@ using YoutubeExplode.Videos.Streams;
 using YoutubeExplode.Converter;
 using YoutubeExplode.Videos;
 using ByteSizeLib;
+using System.Threading;
+using System.Linq;
 
 namespace VideoDownloader.Api.Services
 {
@@ -34,8 +36,14 @@ namespace VideoDownloader.Api.Services
             foreach (var video in videos)
             {
                 Log.Information($"getting stream manifest for video id '{video.Id}' with duration of ({video.Duration})");
-                var manifests = await _youtubeClient.Videos.Streams.GetManifestAsync(video.Id);                
-                if (manifests != null)
+                StreamManifest manifests = new StreamManifest(new List<IStreamInfo>());
+                await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
+                {
+                    var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromSeconds(15));
+                    manifests = await _youtubeClient.Videos.Streams.GetManifestAsync(video.Id, cts.Token);
+                });
+
+                if (manifests.Streams.Any())
                 {
                         // get best audio and video streams if we're downloading them seperately
                         var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
@@ -47,18 +55,16 @@ namespace VideoDownloader.Api.Services
                         try
                         {
                             // path contains ending slash
-                            Log.Information(@$"downloading {fullVideoTitle} 
-                                            at bitrate '{hqAud.Bitrate}' 
-                                            video quality '{hqVid.VideoQuality}' 
-                                            and resolution '{hqVid.VideoResolution}'");
-
-                            await RetryPolicyHandler.DownloadRetryPolicy().ExecuteAsync(async () =>
+                            Log.Information(@$"downloading {fullVideoTitle} {hqAud.Bitrate} {hqVid.VideoQuality} {hqVid.VideoResolution}");
+                            await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
                             {
+                                var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromMinutes(1));
                                 await _youtubeClient.Videos.DownloadAsync(
                                      new IStreamInfo[] { hqAud, hqVid },
                                          new ConversionRequestBuilder(fullPath)                                             
                                              .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
-                                             .Build());                                
+                                             .Build(), 
+                                         cancellationToken : cts.Token);
                             });
                         }
                         catch (Exception ex)
