@@ -1,4 +1,5 @@
 ﻿using Polly;
+using Serilog;
 using System;
 using System.Net.Http;
 
@@ -12,9 +13,12 @@ namespace VideoDownloader.Api.Services
             return Policy
                 .Handle<HttpRequestException>()
                 .WaitAndRetryAsync(new[] { 
+                        TimeSpan.FromSeconds(3),
                         TimeSpan.FromSeconds(10),
-                        TimeSpan.FromSeconds(20),
-                        TimeSpan.FromSeconds(30)
+                        TimeSpan.FromSeconds(15)
+                }, (exception, timeSpan, context) =>
+                {
+                    Log.Error(exception, $"retry seconds {timeSpan.TotalSeconds}", context);
                 });
         }
     }

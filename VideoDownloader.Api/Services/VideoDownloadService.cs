@@ -56,11 +56,9 @@ namespace VideoDownloader.Api.Services
                             {
                                 await _youtubeClient.Videos.DownloadAsync(
                                      new IStreamInfo[] { hqAud, hqVid },
-                                         new ConversionRequestBuilder(fullPath)
-                                             .SetPreset(ConversionPreset.UltraFast)
+                                         new ConversionRequestBuilder(fullPath)                                             
                                              .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
-                                             .Build()
-                                             );                                
+                                             .Build());                                
                             });
                         }
                         catch (Exception ex)
