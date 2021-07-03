@@ -15,11 +15,13 @@ namespace VideoDownloader.Api.Controllers
     [ApiController]
     public class VideoController : ControllerBase
     {
-        private readonly IVideoDownloadService  _videoService;
+        private readonly IVideoService  _videoService;
+        private readonly IEditingService _editingService;
 
-        public VideoController(IVideoDownloadService videoService)
+        public VideoController(IVideoService videoService, IEditingService editingService)
         {
             _videoService = videoService;
+            _editingService = editingService;
         }
 
         /// <summary>
@@ -46,16 +48,20 @@ namespace VideoDownloader.Api.Controllers
         [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
         [HttpPost("downloadandedit")]
-        public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads)
+        public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads, string fileName)
         {
-            var results = new List<VideoDownloadResult>();
-
             try
             {
                 if (downloads.Any())
                 {
-                    var videos = await _videoService.GetVideos(downloads);
-                    results = (await _videoService.DownloadVideos(videos)).ToList();
+                    // get the youtube videos
+                    var videos = await _videoService.GetYoutubeVideos(downloads);
+
+                    // get the manifest streams
+                    var files = await _videoService.GetVideoDownloads(videos);
+
+                    // create all the video clips
+                    var videoEditResults = await _editingService.GetVideoEditResults(files);
                 }
                 else
                 {
@@ -68,7 +74,7 @@ namespace VideoDownloader.Api.Controllers
                 return BadRequest();
             }
 
-            return Ok(results);
+            return Ok();
         }
     }
 }

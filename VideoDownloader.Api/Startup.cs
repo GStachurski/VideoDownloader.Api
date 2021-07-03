@@ -50,7 +50,8 @@ namespace VideoDownloader.Api
 
             // data and video downloader services
             services.AddSingleton<IDataParsingService, DataParsingService>();
-            services.AddSingleton<IVideoDownloadService, VideoDownloadService>();
+            services.AddSingleton<IVideoService, VideoService>();
+            services.AddSingleton<IEditingService, EditingService>();
 
             // ffmpeg
             ConfigureFFmpeg();
