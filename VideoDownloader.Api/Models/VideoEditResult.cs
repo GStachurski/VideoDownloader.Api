@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace VideoDownloader.Api.Models
 {
@@ -9,5 +6,7 @@ namespace VideoDownloader.Api.Models
     {
         public string Location { get; set; }
         public int Order { get; set; }
+        public long Size { get; set; }
+        public TimeSpan Length { get; set; }
     }
 }

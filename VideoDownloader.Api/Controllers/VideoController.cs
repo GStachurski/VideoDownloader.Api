@@ -50,31 +50,35 @@ namespace VideoDownloader.Api.Controllers
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads, string fileName)
         {
+            var result = new VideoEditResult();
+
             try
             {
                 if (downloads.Any())
                 {
-                    // get the youtube videos
+                    Log.Information($"getting {downloads.Count} youtube video manifests");
                     var videos = await _videoService.GetYoutubeVideos(downloads);
-
-                    // get the manifest streams
+                    
+                    Log.Information($"downloading {videos.Count()} videos");
                     var files = await _videoService.GetVideoDownloads(videos);
-
-                    // create all the video clips
+                    
+                    Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
                     var videoEditResults = await _editingService.GetVideoEditResults(files);
+                    
+                    Log.Information($"creating final video {fileName}.mp4");
+                    result = await _editingService.CreateVideoFromVideoClips(videoEditResults, fileName);
                 }
                 else
                 {
-                    return NoContent();
+                    Log.Warning($"no downloads provided"); return NoContent();
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "error occured while geting video manifests");
-                return BadRequest();
+                Log.Error(ex, "error occured while geting video manifests"); return BadRequest();
             }
 
-            return Ok();
+            return Ok(result);
         }
     }
 }

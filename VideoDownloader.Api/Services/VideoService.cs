@@ -59,7 +59,7 @@ namespace VideoDownloader.Api.Services
             {
                 var video = manifest.Video;
                 Log.Information($"getting stream manifest for video id '{video.Id}' with duration of ({video.Duration})");
-                StreamManifest manifests = new StreamManifest(new List<IStreamInfo>());
+                StreamManifest manifests = new (new List<IStreamInfo>());
                 await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
                 {
                     var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromSeconds(15));
