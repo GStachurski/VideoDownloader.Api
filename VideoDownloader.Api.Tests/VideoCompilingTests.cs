@@ -124,6 +124,8 @@ namespace VideoDownloader.Api.Tests
 
             int fileCount = 0;
             var fileListAndIndex = new List<Tuple<int, string>>();
+
+            var calculatedDuration = new TimeSpan();
             var finalDuration = new TimeSpan();
 
             var videoPath = @"C:\Videos\bobross_video_sample2.mp4";
@@ -136,6 +138,11 @@ namespace VideoDownloader.Api.Tests
                 new EditWindow { StartTime = new TimeSpan(0,14,26), EndTime = new TimeSpan(0,20,38) }
             };
 
+            foreach (var window in editList)
+            {
+                calculatedDuration = calculatedDuration.Add(window.EndTime - window.StartTime);
+            };
+
             // act
             // chop up two parts of the video into seperate files
             // : bobross_video_sample2_1_chopped.mp4 (05m02s)
@@ -143,14 +150,14 @@ namespace VideoDownloader.Api.Tests
             foreach (var edit in editList)
             {
                 // pad the end by a second just to make sure we get full clip
-                var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(1);
+                var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(.1);
                 var formatVideoOutputPath = string.Format(videoOutputPath, fileCount);
 
                 Task.Run(async () =>
                 {
                     IMediaInfo mediaInfo = await FFmpeg.GetMediaInfo(videoPath);
                     IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoPath, formatVideoOutputPath, edit.StartTime, timeSpanDiff);
-                    IConversionResult result = await conversion.Start();
+                    IConversionResult result = await conversion.Start();                    
                 }).GetAwaiter().GetResult();
 
                 fileCount++;
@@ -164,12 +171,13 @@ namespace VideoDownloader.Api.Tests
                 var concantenatedVideos = await FFmpeg.Conversions.FromSnippet.Concatenate(videoFinalPath, videoPaths);
                 await concantenatedVideos.Start();
                 IMediaInfo finalVideoInfo = await FFmpeg.GetMediaInfo(videoFinalPath);
-
+                finalDuration = finalVideoInfo.Duration;
             }).GetAwaiter().GetResult();
 
 
             // assert
             Assert.IsTrue(File.Exists(videoFinalPath));
+            Assert.IsTrue(finalDuration >= calculatedDuration);
         }
     }
 }
