@@ -54,6 +54,11 @@ namespace VideoDownloader.Api.Controllers
 
             try
             {
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return BadRequest("no filename provided");
+                }
+
                 if (downloads.Any())
                 {
                     Log.Information($"getting {downloads.Count} youtube video manifests");
@@ -63,19 +68,82 @@ namespace VideoDownloader.Api.Controllers
                     var files = await _videoService.GetVideoDownloads(videos);
                     
                     Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
-                    var videoEditResults = await _editingService.GetVideoEditResults(files);
+                    var edits = await _editingService.GetVideoEditResults(files);
                     
                     Log.Information($"creating final video {fileName}.mp4");
-                    result = await _editingService.CreateVideoFromVideoClips(videoEditResults, fileName);
+                    result = await _editingService.CreateVideoFromVideoClips(edits, fileName);
                 }
                 else
                 {
-                    Log.Warning($"no downloads provided"); return NoContent();
+                    Log.Warning($"no downloads provided"); 
+                    return NoContent();
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "error occured while geting video manifests"); return BadRequest();
+                Log.Error(ex, "error occured while geting video manifests"); 
+                return BadRequest();
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Takes a list of videos with download locations and converts them to one larger clip
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// {
+        ///   "downloads": [
+        ///     {
+        ///       "Name": "Wilderness Cabin",
+        ///       "Url": "https://www.youtube.com/watch?v=GWehiacnd1E",
+        ///       "EditTimes": "15:41-20:11"
+        ///     },
+        ///     {
+        ///       "Name": "Roadside Barn",
+        ///       "Url": "https://www.youtube.com/watch?v=vJpKhiXvXdA",
+        ///       "EditTimes": "16:24-22:00"
+        ///     }]
+        /// }
+        /// </remarks>
+        /// <param name="downloads">A JSON array of downloads</param>
+        /// <returns></returns>
+        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
+        [HttpPost("downloadandedit")]
+        public async Task<ActionResult> Edit([FromBody] List<PartialDownload> partialDownloads, string fileName)
+        {
+            var result = new VideoEditResult();
+
+            try
+            {
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return BadRequest("no filename provided");
+                }
+
+                if (partialDownloads.Any())
+                {
+                    Log.Information($"converting {partialDownloads.Count} partial downloads to files");
+                    var files = _videoService.MapPartialDownloadsToDownloadResults(partialDownloads);
+
+                    Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
+                    var edits = await _editingService.GetVideoEditResults(files);
+
+                    Log.Information($"creating final video {fileName}.mp4");
+                    result = await _editingService.CreateVideoFromVideoClips(edits, fileName);
+                }
+                else
+                {
+                    Log.Warning($"no downloads provided");
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "error occured while geting video manifests");
+                return BadRequest();
             }
 
             return Ok(result);

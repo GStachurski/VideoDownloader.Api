@@ -30,7 +30,8 @@ namespace VideoDownloader.Api.Services
                 foreach (var edit in videoResult.EditWindows)
                 {
                     // pad the end by a second just to make sure we get full clip
-                    var fullTitle = $"{videoResult.Video.Title}{fileCount}.{videoResult.HqVideoStream.Container}";
+                    //var fullTitle = $"{videoResult.Video.Title}{"_"}{fileCount}.{videoResult.HqVideoStream.Container}";
+                    var fullTitle = $"{videoResult.Title}{"_"}{fileCount}{".mp4"}";
                     var fullPath = $"{_downloadPath}{fullTitle}";
                     var videoOutputPath = fullPath;
 
@@ -52,7 +53,7 @@ namespace VideoDownloader.Api.Services
             var listEdits = videoEditResults.OrderBy(ed => ed.Order);
 
             // setup the final file output location and name
-            var finalFileName = $"{_downloadPath}{fileName}{"_"}{listEdits.Count()}{".mp4 "}";
+            var finalFileName = $"{_downloadPath}{fileName}{"_"}{listEdits.Count()}{".mp4"}";
 
             // var start the conversion
             var concantVideos = await FFmpeg.Conversions.FromSnippet.Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());

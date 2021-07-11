@@ -11,6 +11,7 @@ using YoutubeExplode.Videos.Streams;
 using YoutubeExplode.Converter;
 using System.Threading;
 using System.Linq;
+using System.IO;
 
 namespace VideoDownloader.Api.Services
 {
@@ -98,17 +99,33 @@ namespace VideoDownloader.Api.Services
 
                     videoDownloadResults.Add(new VideoDownloadResult
                     {
-                        Title = fullVideoTitle,
+                        EditWindows = manifest.EditWindows,
+                        HqVideoStream = hqVid,
                         IsSuccessful = true,
                         Location = fullPath,
-                        EditWindows = manifest.EditWindows,
                         Order = manifest.Order,
-                        HqVideoStream = hqVid
+                        Title = fullVideoTitle,
+                        Video = video
                     });
                 }
             }
 
             return videoDownloadResults;
+        }
+
+        public IEnumerable<VideoDownloadResult> MapPartialDownloadsToDownloadResults(IEnumerable<PartialDownload> partialDownloads)
+        {
+            return (from pd in partialDownloads
+                    let vdr = new VideoDownloadResult()
+                    {
+                        Title = Path.GetFileName(pd.Location),
+                        IsSuccessful = true,
+                        Location = pd.Location,
+                        Order = pd.EditOrder.Value,
+                        HqVideoStream = null,
+                        EditWindows = _parsingService.GetVideoEditWindows(pd)
+                    }
+                    select vdr).ToList();
         }
     }
 }

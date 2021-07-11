@@ -9,5 +9,7 @@ namespace VideoDownloader.Api.Interfaces
         Task<IEnumerable<YoutubeVideoResult>> GetYoutubeVideos(IEnumerable<Download> downloads);
 
         Task<IEnumerable<VideoDownloadResult>> GetVideoDownloads(IEnumerable<YoutubeVideoResult> youtubeVideos);
+
+        IEnumerable<VideoDownloadResult> MapPartialDownloadsToDownloadResults(IEnumerable<PartialDownload> partialDownloads);
     }
 }
