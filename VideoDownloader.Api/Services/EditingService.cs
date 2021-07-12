@@ -30,16 +30,16 @@ namespace VideoDownloader.Api.Services
                 foreach (var edit in videoResult.EditWindows)
                 {
                     // pad the end by a second just to make sure we get full clip
-                    //var fullTitle = $"{videoResult.Video.Title}{"_"}{fileCount}.{videoResult.HqVideoStream.Container}";
-                    var fullTitle = $"{videoResult.Title}{"_"}{fileCount}{".mp4"}";
+                    var fullTitle = $"{videoResult.Video.Title}{"_"}{fileCount}.{videoResult.HqVideoStream.Container}";
                     var fullPath = $"{_downloadPath}{fullTitle}";
                     var videoOutputPath = fullPath;
 
                     var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(1);
                     IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoResult.Location, videoOutputPath, edit.StartTime, timeSpanDiff);
-                    IConversionResult result = await conversion.Start();
+                    IConversionResult result = await conversion.Start();                                        
 
-                    var chopResult = new VideoEditResult { Location = videoOutputPath, Order = videoResult.Order };
+                    var chop = new VideoEditResult { Location = videoOutputPath, Order = videoResult.Order };
+                    results.Add(chop);
                     fileCount++;
                 }
             }

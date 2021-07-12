@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using VideoDownloader.Api.Interfaces;
 using VideoDownloader.Api.Models;
@@ -60,13 +61,23 @@ namespace VideoDownloader.Api.Services
                 if (editTimes.Length != 2) return editWindow;
 
                 _ = new TimeSpan();
-                if (TimeSpan.TryParse(editTimes[0], out TimeSpan startTs))
+                if (TimeSpan.TryParseExact(
+                    editTimes[0], 
+                    "m\\:ss", 
+                    new CultureInfo("en-US"), 
+                    TimeSpanStyles.None,
+                    out TimeSpan startTs))
                 {
                     editWindow.StartTime = startTs;
                 }
 
                 _ = new TimeSpan();
-                if (TimeSpan.TryParse(editTimes[1], out TimeSpan endTs))
+                if (TimeSpan.TryParseExact(
+                    editTimes[1],
+                    "m\\:ss",
+                    new CultureInfo("en-US"),
+                    TimeSpanStyles.None,
+                    out TimeSpan endTs))
                 {
                     editWindow.EndTime = endTs;
                 }

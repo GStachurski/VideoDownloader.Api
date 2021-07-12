@@ -98,20 +98,22 @@ namespace VideoDownloader.Api.Controllers
         ///     {
         ///       "Name": "Wilderness Cabin",
         ///       "Url": "https://www.youtube.com/watch?v=GWehiacnd1E",
+        ///       "Locations": "C:\\Videos\\WilderNess Cabin.mp4",
         ///       "EditTimes": "15:41-20:11"
         ///     },
         ///     {
         ///       "Name": "Roadside Barn",
         ///       "Url": "https://www.youtube.com/watch?v=vJpKhiXvXdA",
+        ///       "Locations": "C:\\Videos\\Roadside Barn.mp4",
         ///       "EditTimes": "16:24-22:00"
         ///     }]
         /// }
         /// </remarks>
-        /// <param name="downloads">A JSON array of downloads</param>
+        /// <param name="downloads">A JSON array of partial video edits</param>
         /// <returns></returns>
-        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video download.")]
+        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video edit.")]
         [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
-        [HttpPost("downloadandedit")]
+        [HttpPost("edit")]
         public async Task<ActionResult> Edit([FromBody] List<PartialDownload> partialDownloads, string fileName)
         {
             var result = new VideoEditResult();

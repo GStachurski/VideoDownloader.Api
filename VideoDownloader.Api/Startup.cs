@@ -9,8 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using System;
-using System.IO;
 using System.Linq;
 using VideoDownloader.Api.Interfaces;
 using VideoDownloader.Api.Options;
@@ -74,9 +72,9 @@ namespace VideoDownloader.Api
 
         public void ConfigureFFmpeg()
         {
-            var ffmpegPath = Configuration.GetValue<string>("ApiOptions:VideoSettings:FFmpegPath");
-            Log.Information($"loading ffmpegPath from {ffmpegPath}");
-            FFmpeg.SetExecutablesPath(ffmpegPath);
+            var ffmpegDir = Configuration.GetValue<string>("ApiOptions:VideoSettings:FFmpegDirectory");
+            Log.Information($"loading ffmpegDirectory from {ffmpegDir}");
+            FFmpeg.SetExecutablesPath(ffmpegDir);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

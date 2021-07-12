@@ -12,6 +12,7 @@ using YoutubeExplode.Converter;
 using System.Threading;
 using System.Linq;
 using System.IO;
+using YoutubeExplode.Videos;
 
 namespace VideoDownloader.Api.Services
 {
@@ -37,7 +38,13 @@ namespace VideoDownloader.Api.Services
             {
                 if (_parsingService.IsValidDownloadUrl(download.Url))
                 {
-                    var video = await _youtubeClient.Videos.GetAsync(download.Url);
+                    Video video = null;
+                    await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
+                    {
+                        Log.Information($"getting video metadata for download '{download.Name}'");
+                        video = await _youtubeClient.Videos.GetAsync(download.Url);
+                    });
+
                     var manifestResult = new YoutubeVideoResult
                     {
                         EditWindows = _parsingService.GetVideoEditWindows(download),
@@ -76,25 +83,29 @@ namespace VideoDownloader.Api.Services
                     var fullVideoTitle = $"{video.Title}.{hqVid.Container.Name}";
                     var fullPath = $"{_downloadPath}{fullVideoTitle}";
 
-                    try
+                    // see if it already exists
+                    if (!File.Exists(fullPath))
                     {
-                        // path contains ending slash
-                        Log.Information(@$"downloading {fullVideoTitle} {hqAud.Bitrate} {hqVid.VideoQuality} {hqVid.VideoResolution}");
-                        await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
+                        try
                         {
-                            var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromMinutes(1));
-                            await _youtubeClient.Videos.DownloadAsync(
-                                 new IStreamInfo[] { hqAud, hqVid },
-                                     new ConversionRequestBuilder(fullPath)
-                                         .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
-                                         .Build(),
-                                     cancellationToken: cts.Token);
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, $"error while attempting to download video {hqVid.Url}");
-                        throw ex;
+                            // path contains ending slash
+                            Log.Information(@$"downloading {fullVideoTitle} {hqAud.Bitrate} {hqVid.VideoQuality} {hqVid.VideoResolution}");
+                            await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
+                            {
+                                var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromMinutes(1));
+                                await _youtubeClient.Videos.DownloadAsync(
+                                     new IStreamInfo[] { hqAud, hqVid },
+                                         new ConversionRequestBuilder(fullPath)
+                                             .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
+                                             .Build(),
+                                         cancellationToken: cts.Token);
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, $"error while attempting to download video {hqVid.Url}");
+                            throw ex;
+                        }
                     }
 
                     videoDownloadResults.Add(new VideoDownloadResult
@@ -118,7 +129,7 @@ namespace VideoDownloader.Api.Services
             return (from pd in partialDownloads
                     let vdr = new VideoDownloadResult()
                     {
-                        Title = Path.GetFileName(pd.Location),
+                        Title = Path.GetFileNameWithoutExtension(pd.Location),
                         IsSuccessful = true,
                         Location = pd.Location,
                         Order = pd.EditOrder.Value,
