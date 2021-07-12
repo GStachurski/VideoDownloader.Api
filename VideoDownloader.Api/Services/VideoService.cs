@@ -123,20 +123,5 @@ namespace VideoDownloader.Api.Services
 
             return videoDownloadResults;
         }
-
-        public IEnumerable<VideoDownloadResult> MapPartialDownloadsToDownloadResults(IEnumerable<PartialDownload> partialDownloads)
-        {
-            return (from pd in partialDownloads
-                    let vdr = new VideoDownloadResult()
-                    {
-                        Title = Path.GetFileNameWithoutExtension(pd.Location),
-                        IsSuccessful = true,
-                        Location = pd.Location,
-                        Order = pd.EditOrder.Value,
-                        HqVideoStream = null,
-                        EditWindows = _parsingService.GetVideoEditWindows(pd)
-                    }
-                    select vdr).ToList();
-        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,21 +23,15 @@ namespace VideoDownloader.Api.Services
         {
             var editWindows = new List<EditWindow>();
 
+            // no edit windows (entire clip is used)
             if (string.IsNullOrEmpty(download.EditTimes))
             {
                 return editWindows;
             }
 
-            if (download.EditTimes.Contains(',', StringComparison.InvariantCultureIgnoreCase))
-            {
-                // TODO: check for a split limit here eventually (10 or 25?)
-                var editTimeList = download.EditTimes.Split(',').ToList();
-                editWindows.AddRange(from editTime in editTimeList select GetEditWindow(editTime));
-            }
-            else
-            {
-                editWindows.Add(GetEditWindow(download.EditTimes));
-            }
+            var editTimeList = download.EditTimes.Split(',').ToList();
+            editTimeList = editTimeList.Skip(0).Take(_apiOptions.EditWindowLimit).ToList();
+            editWindows.AddRange(from editTime in editTimeList select GetEditWindow(editTime));
 
             return editWindows;
         }
@@ -57,33 +52,26 @@ namespace VideoDownloader.Api.Services
             var editWindow = new EditWindow();
             if (editWindowStr.Contains('-', StringComparison.InvariantCultureIgnoreCase))
             {
-                var editTimes = editWindowStr.Split('-');
-                if (editTimes.Length != 2) return editWindow;
+                var edits = editWindowStr.Split('-');
+                if (edits.Length != 2) return editWindow;
 
-                _ = new TimeSpan();
-                if (TimeSpan.TryParseExact(
-                    editTimes[0], 
-                    "m\\:ss", 
-                    new CultureInfo("en-US"), 
-                    TimeSpanStyles.None,
-                    out TimeSpan startTs))
+                Log.Information($"splitting times from window string {editWindowStr}");
+                if (TryParseEditWindow(edits[0], out TimeSpan startTs))
                 {
                     editWindow.StartTime = startTs;
                 }
-
-                _ = new TimeSpan();
-                if (TimeSpan.TryParseExact(
-                    editTimes[1],
-                    "m\\:ss",
-                    new CultureInfo("en-US"),
-                    TimeSpanStyles.None,
-                    out TimeSpan endTs))
+                if (TryParseEditWindow(edits[1], out TimeSpan endTs))
                 {
                     editWindow.EndTime = endTs;
                 }
             }
 
             return editWindow;
+        }
+
+        private bool TryParseEditWindow(string edit, out TimeSpan ts)
+        {
+            return TimeSpan.TryParseExact(edit, "m\\:ss", new CultureInfo("en-US"), TimeSpanStyles.None, out ts);
         }
     }
 }

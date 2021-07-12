@@ -72,7 +72,7 @@ namespace VideoDownloader.Api
 
         public void ConfigureFFmpeg()
         {
-            var ffmpegDir = Configuration.GetValue<string>("ApiOptions:VideoSettings:FFmpegDirectory");
+            var ffmpegDir = Configuration.GetValue<string>(nameof(ApiOptions.VideoSettings.FFmpegDirectory));
             Log.Information($"loading ffmpegDirectory from {ffmpegDir}");
             FFmpeg.SetExecutablesPath(ffmpegDir);
         }

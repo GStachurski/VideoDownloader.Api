@@ -19,7 +19,6 @@ namespace VideoDownloader.Api.Services
             _apiOptions = options.Value;
             _downloadPath = _apiOptions.VideoSettings.DownloadPath;
         }
-
         public async Task<IEnumerable<VideoEditResult>> GetVideoEditResults(IEnumerable<VideoDownloadResult> videoDownloadResults)
         {
             var results = new List<VideoEditResult>();
