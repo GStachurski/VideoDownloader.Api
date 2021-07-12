@@ -9,10 +9,10 @@
 
     public class VideoSettings
     {
+        public string DownloadPath { get; set; }
         public string DownloadUrl { get; set; }
         public string EditingUrl { get; set; }
         public string FFmpegPath { get; set; }
-
-        public string DownloadPath { get; set; }
+        public string FFmpegDirectory { get; set; }
     }
 }

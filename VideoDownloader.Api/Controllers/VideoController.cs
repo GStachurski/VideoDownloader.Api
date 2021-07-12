@@ -50,21 +50,95 @@ namespace VideoDownloader.Api.Controllers
         [HttpPost("downloadandedit")]
         public async Task<ActionResult> DownloadAndEdit([FromBody] List<Download> downloads, string fileName)
         {
+            var result = new VideoEditResult();
+
             try
             {
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return BadRequest("no filename provided");
+                }
+
                 if (downloads.Any())
                 {
-                    // get the youtube videos
+                    Log.Information($"getting {downloads.Count} youtube video manifests");
                     var videos = await _videoService.GetYoutubeVideos(downloads);
-
-                    // get the manifest streams
+                    
+                    Log.Information($"downloading {videos.Count()} videos");
                     var files = await _videoService.GetVideoDownloads(videos);
-
-                    // create all the video clips
-                    var videoEditResults = await _editingService.GetVideoEditResults(files);
+                    
+                    Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
+                    var edits = await _editingService.GetVideoEditResults(files);
+                    
+                    Log.Information($"creating final video {fileName}.mp4");
+                    result = await _editingService.CreateVideoFromVideoClips(edits, fileName);
                 }
                 else
                 {
+                    Log.Warning($"no downloads provided"); 
+                    return NoContent();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "error occured while geting video manifests"); 
+                return BadRequest();
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Takes a list of videos with download locations and converts them to one larger clip
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// {
+        ///   "downloads": [
+        ///     {
+        ///       "Name": "Wilderness Cabin",
+        ///       "Url": "https://www.youtube.com/watch?v=GWehiacnd1E",
+        ///       "Locations": "C:\\Videos\\WilderNess Cabin.mp4",
+        ///       "EditTimes": "15:41-20:11"
+        ///     },
+        ///     {
+        ///       "Name": "Roadside Barn",
+        ///       "Url": "https://www.youtube.com/watch?v=vJpKhiXvXdA",
+        ///       "Locations": "C:\\Videos\\Roadside Barn.mp4",
+        ///       "EditTimes": "16:24-22:00"
+        ///     }]
+        /// }
+        /// </remarks>
+        /// <param name="downloads">A JSON array of partial video edits</param>
+        /// <returns></returns>
+        [SwaggerResponse((int)HttpStatusCode.OK, "Successful video edit.")]
+        [SwaggerResponse((int)HttpStatusCode.BadRequest, "Bad Request, see error output.")]
+        [HttpPost("edit")]
+        public async Task<ActionResult> Edit([FromBody] List<PartialDownload> partialDownloads, string fileName)
+        {
+            var result = new VideoEditResult();
+
+            try
+            {
+                if (string.IsNullOrEmpty(fileName))
+                {
+                    return BadRequest("no filename provided");
+                }
+
+                if (partialDownloads.Any())
+                {
+                    Log.Information($"converting {partialDownloads.Count} partial downloads to files");
+                    var files = _videoService.MapPartialDownloadsToDownloadResults(partialDownloads);
+
+                    Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
+                    var edits = await _editingService.GetVideoEditResults(files);
+
+                    Log.Information($"creating final video {fileName}.mp4");
+                    result = await _editingService.CreateVideoFromVideoClips(edits, fileName);
+                }
+                else
+                {
+                    Log.Warning($"no downloads provided");
                     return NoContent();
                 }
             }
@@ -74,7 +148,7 @@ namespace VideoDownloader.Api.Controllers
                 return BadRequest();
             }
 
-            return Ok();
+            return Ok(result);
         }
     }
 }

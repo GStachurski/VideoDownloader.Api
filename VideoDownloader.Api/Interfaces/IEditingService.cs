@@ -6,6 +6,8 @@ namespace VideoDownloader.Api.Interfaces
 {
     public interface IEditingService
     {
-        Task<List<VideoEditResult>> GetVideoEditResults(IEnumerable<VideoDownloadResult> videoDownloadResults);
+        Task<IEnumerable<VideoEditResult>> GetVideoEditResults(IEnumerable<VideoDownloadResult> videoDownloadResults);
+
+        Task<VideoEditResult> CreateVideoFromVideoClips(IEnumerable<VideoEditResult> videoEditResults, string fileName);
     }
 }
