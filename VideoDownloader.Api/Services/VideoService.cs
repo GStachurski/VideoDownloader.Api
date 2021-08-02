@@ -92,7 +92,8 @@ namespace VideoDownloader.Api.Services
                             Log.Information(@$"downloading {fullVideoTitle} {hqAud.Bitrate} {hqVid.VideoQuality} {hqVid.VideoResolution}");
                             await RetryPolicyHandler.RetryPolicy().ExecuteAsync(async () =>
                             {
-                                var cts = new CancellationTokenSource(); cts.CancelAfter(TimeSpan.FromMinutes(1));
+                                var cts = new CancellationTokenSource(); 
+                                cts.CancelAfter(TimeSpan.FromMinutes(_apiOptions.VideoSettings.DownloadTimeout));
                                 await _youtubeClient.Videos.DownloadAsync(
                                      new IStreamInfo[] { hqAud, hqVid },
                                          new ConversionRequestBuilder(fullPath)
