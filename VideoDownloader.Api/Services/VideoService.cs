@@ -117,7 +117,8 @@ namespace VideoDownloader.Api.Services
                         Location = fullPath,
                         Order = manifest.Order,
                         Title = fullVideoTitle,
-                        Video = video
+                        Video = video,
+                        Size = hqVid.Size.MegaBytes
                     });
                 }
             }

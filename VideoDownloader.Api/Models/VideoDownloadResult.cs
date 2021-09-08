@@ -9,7 +9,7 @@ namespace VideoDownloader.Api.Models
         public string Title { get; set; }
         public bool IsSuccessful { get; set; }
         public string Location { get; set; }
-        public string Size { get; set; }
+        public double Size { get; set; }
         public int Order { get; set; }
         public IVideo Video { get; set; }
         public IVideoStreamInfo HqVideoStream { get; set; }
