@@ -28,11 +28,11 @@ namespace VideoDownloader.Api.Services
             {
                 foreach (var edit in videoResult.EditWindows)
                 {
-                    // pad the end by a second just to make sure we get full clip
                     var fullTitle = $"{videoResult.Video.Title}{"_"}{fileCount}.{videoResult.HqVideoStream.Container}";
                     var fullPath = $"{_downloadPath}{fullTitle}";
                     var videoOutputPath = fullPath;
 
+                    // pad the diff window by 1 second to make ensure the full clip is cropped
                     var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(1);
                     IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoResult.Location, videoOutputPath, edit.StartTime, timeSpanDiff);
                     IConversionResult result = await conversion.Start();                                        
@@ -48,13 +48,11 @@ namespace VideoDownloader.Api.Services
 
         public async Task<VideoEditResult> CreateVideoFromVideoClips(IEnumerable<VideoEditResult> videoEditResults, string fileName)
         {
-            // transform into a list and sort
+            // transform into a list and sort by video order
             var listEdits = videoEditResults.OrderBy(ed => ed.Order);
 
             // setup the final file output location and name
             var finalFileName = $"{_downloadPath}{fileName}{"_"}{listEdits.Count()}{".mp4"}";
-
-            // var start the conversion
             var concantVideos = await FFmpeg.Conversions.FromSnippet.Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());
             await concantVideos.Start();
             var info = await FFmpeg.GetMediaInfo(finalFileName);
