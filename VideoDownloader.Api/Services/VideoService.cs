@@ -108,6 +108,10 @@ namespace VideoDownloader.Api.Services
                             throw ex;
                         }
                     }
+                    else
+                    {
+                        Log.Information($"download file {fullVideoTitle} already exists in {_downloadPath}");
+                    }
 
                     videoDownloadResults.Add(new VideoDownloadResult
                     {
