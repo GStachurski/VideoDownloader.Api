@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using VideoDownloader.Api.Interfaces;
 using VideoDownloader.Api.Models;
 using VideoDownloader.Api.Options;
@@ -45,6 +46,15 @@ namespace VideoDownloader.Api.Services
                     && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
 
             return result;
+        }
+
+        public string CleanTitle(string s)
+        {
+            StringBuilder sb = new(s);
+            sb.Replace("?", "");
+            sb.Replace("'", "");
+            sb.Replace(".", "");
+            return sb.ToString();
         }
 
         private EditWindow GetEditWindow(string editWindowStr)
