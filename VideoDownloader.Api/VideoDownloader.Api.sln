@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoDownloader.Api", "VideoDownloader.Api.csproj", "{AE92D1BB-F497-4D18-AAB1-91FD1F53A7F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoDownloader.Api", "VideoDownloader.Api.csproj", "{AE92D1BB-F497-4D18-AAB1-91FD1F53A7F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoDownloader.Api.Tests", "..\VideoDownloader.Api.Tests\VideoDownloader.Api.Tests.csproj", "{157EA81E-29D8-4A43-994E-E6FA60F5F5F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoDownloader.Api.Tests", "..\VideoDownloader.Api.Tests\VideoDownloader.Api.Tests.csproj", "{157EA81E-29D8-4A43-994E-E6FA60F5F5F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F30F8987-FFE0-4196-A539-53F44AED27B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{CC0261DB-42A5-4B29-8E7A-6BFBC96A3E95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VideoDownloadClient", "VideoDownloadClient", "{29362BA2-F98D-4866-9DB3-5AC9A47FEF5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoutubeExplode", "..\..\YoutubeExplode\YoutubeExplode\YoutubeExplode.csproj", "{15CCB785-E9CB-40F6-A459-74823FE1CCEB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoutubeExplode.Converter", "..\..\YoutubeExplode\YoutubeExplode.Converter\YoutubeExplode.Converter.csproj", "{6AB32CBF-6D34-4655-8572-AC9FE2A70869}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +31,14 @@ Global
 		{157EA81E-29D8-4A43-994E-E6FA60F5F5F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{157EA81E-29D8-4A43-994E-E6FA60F5F5F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{157EA81E-29D8-4A43-994E-E6FA60F5F5F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15CCB785-E9CB-40F6-A459-74823FE1CCEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15CCB785-E9CB-40F6-A459-74823FE1CCEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15CCB785-E9CB-40F6-A459-74823FE1CCEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15CCB785-E9CB-40F6-A459-74823FE1CCEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AB32CBF-6D34-4655-8572-AC9FE2A70869}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AB32CBF-6D34-4655-8572-AC9FE2A70869}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AB32CBF-6D34-4655-8572-AC9FE2A70869}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AB32CBF-6D34-4655-8572-AC9FE2A70869}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +46,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AE92D1BB-F497-4D18-AAB1-91FD1F53A7F3} = {CC0261DB-42A5-4B29-8E7A-6BFBC96A3E95}
 		{157EA81E-29D8-4A43-994E-E6FA60F5F5F6} = {F30F8987-FFE0-4196-A539-53F44AED27B9}
+		{15CCB785-E9CB-40F6-A459-74823FE1CCEB} = {29362BA2-F98D-4866-9DB3-5AC9A47FEF5C}
+		{6AB32CBF-6D34-4655-8572-AC9FE2A70869} = {29362BA2-F98D-4866-9DB3-5AC9A47FEF5C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {37B5B07F-1900-4AFD-8B8E-884C216C6BE9}

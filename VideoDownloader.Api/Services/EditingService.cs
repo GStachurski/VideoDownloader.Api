@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using VideoDownloader.Api.Interfaces;
@@ -47,10 +48,14 @@ namespace VideoDownloader.Api.Services
                         var fullPath = $"{_downloadPath}{fullTitle}";
                         var videoOutputPath = fullPath;
 
-                        // pad the diff window by a second so we know the full clip is cropped
-                        var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(1);
-                        IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoResult.Location, videoOutputPath, edit.StartTime, timeSpanDiff);
-                        IConversionResult result = await conversion.Start();
+                        // it's possible the chop already exists
+                        if (!File.Exists(videoOutputPath))
+                        {
+                            // pad the diff window by a second so we know the full clip is cropped
+                            var timeSpanDiff = (edit.EndTime - edit.StartTime) + TimeSpan.FromSeconds(1);
+                            IConversion conversion = await FFmpeg.Conversions.FromSnippet.Split(videoResult.Location, videoOutputPath, edit.StartTime, timeSpanDiff);
+                            IConversionResult result = await conversion.Start();
+                        }
 
                         var chop = new VideoEditResult { Location = videoOutputPath, Order = videoResult.Order };
                         results.Add(chop);
@@ -78,7 +83,7 @@ namespace VideoDownloader.Api.Services
                 .Conversions
                 .FromSnippet
                 .Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());
-            await concantVideos.UseMultiThread(true).Start();
+            var result = await concantVideos.UseMultiThread(true).Start();
             var info = await FFmpeg.GetMediaInfo(finalFileName);
 
             return new VideoEditResult 
