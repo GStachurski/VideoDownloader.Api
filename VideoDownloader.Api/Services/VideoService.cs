@@ -13,6 +13,7 @@ using System.Threading;
 using System.Linq;
 using System.IO;
 using YoutubeExplode.Videos;
+using System.Text;
 
 namespace VideoDownloader.Api.Services
 {
@@ -80,7 +81,8 @@ namespace VideoDownloader.Api.Services
                     var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
                     var hqVid = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
 
-                    var fullVideoTitle = $"{video.Title}.{hqVid.Container.Name}";
+                    // clean the video title to avoid bad filenames
+                    var fullVideoTitle = $"{_parsingService.CleanTitle(video.Title)}.{hqVid.Container.Name}";
                     var fullPath = $"{_downloadPath}{fullVideoTitle}";
 
                     // see if it already exists
@@ -97,6 +99,7 @@ namespace VideoDownloader.Api.Services
                                 await _youtubeClient.Videos.DownloadAsync(
                                      new IStreamInfo[] { hqAud, hqVid },
                                          new ConversionRequestBuilder(fullPath)
+                                             .SetPreset(ConversionPreset.UltraFast)                                             
                                              .SetFFmpegPath(_apiOptions.VideoSettings.FFmpegPath)
                                              .Build(),
                                          cancellationToken: cts.Token);

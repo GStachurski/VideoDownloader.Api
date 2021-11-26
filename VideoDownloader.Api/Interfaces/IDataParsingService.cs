@@ -8,5 +8,7 @@ namespace VideoDownloader.Api.Interfaces
         List<EditWindow> GetVideoEditWindows(Download download);
 
         bool IsValidDownloadUrl(string downloadUrl);
+
+        string CleanTitle(string s);
     }
 }
