@@ -179,5 +179,73 @@ namespace VideoDownloader.Api.Tests
             Assert.IsTrue(File.Exists(videoFinalPath));
             Assert.IsTrue(finalDuration >= calculatedDuration);
         }
+
+        [TestMethod]
+        public void BlocksOfXOrMoreSnippetsAreBrokenUp()
+        {
+            // arrange
+            var snippetMax = 30;
+            var snippetBlockMax = 5;
+            //var locList = new List<string> {
+            //    "F:\\Videos\\Bob Ross - Majestic Mountains (Season 4 Episode 3)_0.mp4",
+            //    "F:\\Videos\\Bob Ross - Majestic Mountains (Season 4 Episode 3)_1.mp4",
+            //    "F:\\Videos\\Bob Ross - Distant Mountains (Season 14 Episode 1)_2.mp4",
+            //    "F:\\Videos\\Bob Ross - Distant Mountains (Season 14 Episode 1)_3.mp4",
+            //    "F:\\Videos\\Bob Ross - One Hour Special - The Grandeur of Summer_4.mp4",
+            //    "F:\\Videos\\Bob Ross - One Hour Special - The Grandeur of Summer_5.mp4",
+            //    "F:\\Videos\\Bob Ross - One Hour Special - The Grandeur of Summer_6.mp4",
+            //    "F:\\Videos\\Bob Ross - Frozen Solitude (Season 13 Episode 2)_7.mp4",
+            //    "F:\\Videos\\Bob Ross - Frozen Solitude (Season 13 Episode 2)_8.mp4",
+            //    "F:\\Videos\\Bob Ross - Frozen Solitude (Season 13 Episode 2)_9.mp4",
+            //    "F:\\Videos\\Bob Ross - Frozen Solitude (Season 13 Episode 2)_10.mp4",
+            //    "F:\\Videos\\Bob Ross - Frozen Solitude (Season 13 Episode 2)_11.mp4",
+            //    "F:\\Videos\\Bob Ross - Foot of the Mountain (Season 8 Episode 8)_12.mp4",
+            //    "F:\\Videos\\Bob Ross - Foot of the Mountain (Season 8 Episode 8)_13.mp4",
+            //    "F:\\Videos\\Bob Ross - Foot of the Mountain (Season 8 Episode 8)_14.mp4",
+            //    "F:\\Videos\\Bob Ross - Bubbling Mountain Brook (Season 8 Episode 6)_15.mp4",
+            //    "F:\\Videos\\Bob Ross - Bubbling Mountain Brook (Season 8 Episode 6)_16.mp4",
+            //    "F:\\Videos\\Bob Ross - Bubbling Mountain Brook (Season 8 Episode 6)_17.mp4",
+            //    "F:\\Videos\\Bob Ross - Bubbling Mountain Brook (Season 8 Episode 6)_18.mp4",
+            //    "F:\\Videos\\Bob Ross - Winter Frost (Season 10 Episode 12)_19.mp4",
+            //    "F:\\Videos\\Bob Ross - Winter Frost (Season 10 Episode 12)_20.mp4",
+            //    "F:\\Videos\\Bob Ross - Winter Frost (Season 10 Episode 12)_21.mp4",
+            //    "F:\\Videos\\Bob Ross - Winter Frost (Season 10 Episode 12)_22.mp4",
+            //    "F:\\Videos\\Bob Ross - Towering Peaks (Season 10 Episode 1)_23.mp4",
+            //    "F:\\Videos\\Bob Ross - Towering Peaks (Season 10 Episode 1)_24.mp4",
+            //    "F:\\Videos\\Bob Ross - Towering Peaks (Season 10 Episode 1)_25.mp4",
+            //    "F:\\Videos\\Bob Ross - Mighty Mountain Lake (Season 16 Episode 12)_26.mp4",
+            //    "F:\\Videos\\Bob Ross - Mighty Mountain Lake (Season 16 Episode 12)_27.mp4",
+            //    "F:\\Videos\\Bob Ross - Mighty Mountain Lake (Season 16 Episode 12)_28.mp4",
+            //    "F:\\Videos\\Bob Ross - Mystic Mountain (Season 20 Episode 1)_29.mp4",
+            //    "F:\\Videos\\Bob Ross - Mystic Mountain (Season 20 Episode 1)_30.mp4",
+            //    "F:\\Videos\\Bob Ross - Mystic Mountain (Season 20 Episode 1)_31.mp4",
+            //    "F:\\Videos\\Bob Ross - Mystic Mountain (Season 20 Episode 1)_32.mp4"
+            //};
+            //var editCounts = locList.Count();
+
+            //// setup the final file output location and name
+            //var finalFileName = $"{_downloadPath}{fileName}{"_"}{listEdits.Count()}{".mp4"}";
+            //var concantVideos = await FFmpeg
+            //    .Conversions
+            //    .FromSnippet
+            //    .Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());
+            //var result = await concantVideos
+            //    .UseMultiThread(true)
+            //    .Start();
+            //var info = await FFmpeg.GetMediaInfo(finalFileName);
+
+            //return new VideoEditResult
+            //{
+            //    Location = finalFileName,
+            //    Size = info.Size,
+            //    Length = info.Duration
+            //};
+
+
+            // act
+
+            // assert
+
+        }
     }
 }

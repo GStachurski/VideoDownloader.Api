@@ -83,7 +83,9 @@ namespace VideoDownloader.Api.Services
                 .Conversions
                 .FromSnippet
                 .Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());
-            var result = await concantVideos.UseMultiThread(true).Start();
+            var result = await concantVideos
+                .UseMultiThread(true)
+                .Start();
             var info = await FFmpeg.GetMediaInfo(finalFileName);
 
             return new VideoEditResult 
