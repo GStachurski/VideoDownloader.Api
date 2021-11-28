@@ -57,7 +57,11 @@ namespace VideoDownloader.Api.Services
                             IConversionResult result = await conversion.Start();
                         }
 
-                        var chop = new VideoEditResult { Location = videoOutputPath, Order = videoResult.Order };
+                        var info = await FFmpeg.GetMediaInfo(fullPath);
+                        var vs = info.VideoStreams.FirstOrDefault();
+                        Log.Information($"video snippet created for {fullPath}, len:{vs.Duration}, vcodec:{vs.Codec}, frate:{vs.Framerate}, brate:{vs.Bitrate}, pxlformat:{vs.PixelFormat}");
+                        
+                        var chop = new VideoEditResult { Location = videoOutputPath, Order = fileCount, Framerate = vs.Framerate, MediaInfo = info };
                         results.Add(chop);
                         fileCount++;
                     }
@@ -80,10 +84,12 @@ namespace VideoDownloader.Api.Services
             // setup the final file output location and name
             var finalFileName = $"{_downloadPath}{fileName}{"_"}{listEdits.Count()}{".mp4"}";
             var concantVideos = await FFmpeg                
-                .Conversions
-                .FromSnippet
+                .Conversions                
+                .FromSnippet                
                 .Concatenate(finalFileName, (from edit in listEdits select edit.Location).ToArray());
-            var result = await concantVideos.UseMultiThread(true).Start();
+            var result = await concantVideos
+                .UseMultiThread(true)
+                .Start();
             var info = await FFmpeg.GetMediaInfo(finalFileName);
 
             return new VideoEditResult 
@@ -92,6 +98,45 @@ namespace VideoDownloader.Api.Services
                 Size = info.Size,
                 Length = info.Duration
             };
+        }
+
+        public async Task<IEnumerable<VideoEditResult>> NormalizeFrameratesFromEdits(IEnumerable<VideoEditResult> edits)
+        {
+            // final edit bag
+            var finalEdits = new List<VideoEditResult>();
+
+            // get the highest framerate in the video set
+            var maxFramerate = edits.Max(ver => ver.Framerate);
+
+            // find any snippets that need to be converted over
+            var editsToConvert = edits.Where(ver => ver.Framerate != maxFramerate);
+
+            // delete and recreate snippets with framerate conversion
+            // TODO: refactor this 
+            foreach (var edit in edits)
+            {
+                if (editsToConvert.Select(etc => etc.Order).ToList().Contains(edit.Order))
+                {
+                    IStream video = edit.MediaInfo.VideoStreams.FirstOrDefault().SetFramerate(maxFramerate);
+                    IStream audio = edit.MediaInfo.AudioStreams.FirstOrDefault();
+
+                    var convertFileName = $"{Path.GetFileNameWithoutExtension(edit.Location)}_converted.mp4";
+                    var outputLocation = $"{_downloadPath}{convertFileName}";
+
+                    Log.Information($"converting video edit {edit.Location} to frametrate {maxFramerate}");
+                    await FFmpeg
+                        .Conversions.New()
+                        .AddStream(video, audio)
+                        .SetOutput(outputLocation)
+                        .Start();
+                    edit.Location = outputLocation;
+                }
+
+                finalEdits.Add(edit);
+            }
+
+            // send em' back
+            return finalEdits;
         }
     }
 }
