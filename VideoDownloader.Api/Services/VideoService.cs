@@ -80,6 +80,7 @@ namespace VideoDownloader.Api.Services
                     // get best audio and video streams if we're downloading them seperately
                     var hqAud = manifests.GetAudioOnlyStreams().GetWithHighestBitrate();
                     var hqVid = manifests.GetVideoOnlyStreams().GetWithHighestVideoQuality();
+                    Log.Information($"video {video.Title} audio stream {hqAud.Bitrate}, video stream {hqVid.Bitrate}");
 
                     // clean the video title to avoid bad filenames
                     var fullVideoTitle = $"{_parsingService.CleanTitle(video.Title)}.{hqVid.Container.Name}";

@@ -69,9 +69,12 @@ namespace VideoDownloader.Api.Controllers
                     
                     Log.Information($"creating {files.Sum(file => file.EditWindows.Count())} video clips");
                     var edits = await _editingService.GetVideoEditResults(files);
+
+                    Log.Information($"converting frame-rates where needed for concantenation");
+                    var finalEdits = await _editingService.NormalizeFrameratesFromEdits(edits);
                     
                     Log.Information($"creating final video {fileName}.mp4");
-                    result = await _editingService.CreateVideoFromVideoClips(edits, fileName);
+                    result = await _editingService.CreateVideoFromVideoClips(finalEdits, fileName);
                 }
                 else
                 {
@@ -81,7 +84,7 @@ namespace VideoDownloader.Api.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "error occured while geting video manifests"); 
+                Log.Error(ex, "error occured");
                 return BadRequest();
             }
 

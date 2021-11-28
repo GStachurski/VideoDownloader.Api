@@ -1,4 +1,5 @@
 ﻿using System;
+using Xabe.FFmpeg;
 
 namespace VideoDownloader.Api.Models
 {
@@ -7,6 +8,8 @@ namespace VideoDownloader.Api.Models
         public string Location { get; set; }
         public int Order { get; set; }
         public long Size { get; set; }
+        public double Framerate { get; set; } 
         public TimeSpan Length { get; set; }
+        public IMediaInfo MediaInfo { get; set; }
     }
 }
